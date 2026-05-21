@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Environnements
+.env
+.env.local
+.env.production
+.env.development
+
+# Builds
+dist/
+build/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
