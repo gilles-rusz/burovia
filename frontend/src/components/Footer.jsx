@@ -1,4 +1,4 @@
-function Footer() {
+function Footer({ onLegalPage }) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -28,19 +28,47 @@ function Footer() {
           <div className="footer-col">
             <h4>Informations</h4>
             <ul>
-              <li><a href="#livraison">Livraison & Retours</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li><a href="#faq">FAQ</a></li>
+              <li>
+                <button onClick={() => onLegalPage('livraison')}>
+                  Livraison & Retours
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onLegalPage('contact')}>
+                  Contact
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onLegalPage('contact')}>
+                  FAQ
+                </button>
+              </li>
             </ul>
           </div>
 
           <div className="footer-col">
             <h4>Légal</h4>
             <ul>
-              <li><a href="#mentions-legales">Mentions légales</a></li>
-              <li><a href="#cgv">CGV</a></li>
-              <li><a href="#confidentialite">Confidentialité</a></li>
-              <li><a href="#retractation">Droit de rétractation</a></li>
+              <li>
+                <button onClick={() => onLegalPage('mentions')}>
+                  Mentions légales
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onLegalPage('cgv')}>
+                  CGV
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onLegalPage('confidentialite')}>
+                  Confidentialité
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onLegalPage('retractation')}>
+                  Droit de rétractation
+                </button>
+              </li>
             </ul>
           </div>
         </div>
