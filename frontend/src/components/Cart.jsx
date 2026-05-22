@@ -1,3 +1,5 @@
+import { ShoppingBag, Trash2, CreditCard, Minus, Plus, X } from 'lucide-react';
+
 function Cart({
   cart,
   cartTotal,
@@ -8,36 +10,66 @@ function Cart({
   onClearCart,
   onCheckout
 }) {
+  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
   return (
     <section id="panier" className="cart-section">
-      <h2>Votre panier</h2>
+      <h2>
+        <ShoppingBag size={24} />
+        Votre panier
+        {itemCount > 0 && (
+          <span className="cart-count-label">
+            ({itemCount} article{itemCount > 1 ? 's' : ''})
+          </span>
+        )}
+      </h2>
 
       {cart.length === 0 ? (
-        <p>Votre panier est vide.</p>
+        <div className="cart-empty">
+          <p>Votre panier est vide.</p>
+          <a href="#catalogue">Parcourir le catalogue</a>
+        </div>
       ) : (
         <>
           <div className="cart-list">
             {cart.map((item) => (
               <div className="cart-item" key={item.id}>
-                <div>
+                <div className="cart-item-info">
                   <strong>{item.name}</strong>
                   <p>
                     {formatPrice(item.price_cents)} × {item.quantity}
+                    {' = '}
+                    <span className="cart-item-price">
+                      {formatPrice(item.price_cents * item.quantity)}
+                    </span>
                   </p>
                 </div>
 
                 <div className="cart-actions">
-                  <button onClick={() => onDecreaseQuantity(item.id)}>
-                    -
+                  <button
+                    className="cart-qty-btn"
+                    onClick={() => onDecreaseQuantity(item.id)}
+                    aria-label="Diminuer"
+                  >
+                    <Minus size={14} />
                   </button>
 
                   <span>{item.quantity}</span>
 
-                  <button onClick={() => onIncreaseQuantity(item.id)}>
-                    +
+                  <button
+                    className="cart-qty-btn"
+                    onClick={() => onIncreaseQuantity(item.id)}
+                    aria-label="Augmenter"
+                  >
+                    <Plus size={14} />
                   </button>
 
-                  <button onClick={() => onRemoveFromCart(item.id)}>
+                  <button
+                    className="cart-remove-btn"
+                    onClick={() => onRemoveFromCart(item.id)}
+                    aria-label="Retirer"
+                  >
+                    <X size={14} />
                     Retirer
                   </button>
                 </div>
@@ -49,11 +81,13 @@ function Cart({
             <strong>Total : {formatPrice(cartTotal)}</strong>
 
             <div className="cart-total-actions">
-              <button onClick={onClearCart}>
-                Vider le panier
+              <button className="btn-clear-cart" onClick={onClearCart}>
+                <Trash2 size={14} />
+                {' '}Vider
               </button>
 
-              <button onClick={onCheckout}>
+              <button className="btn-checkout" onClick={onCheckout}>
+                <CreditCard size={18} />
                 Commander
               </button>
             </div>

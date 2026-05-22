@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowRight, Sparkles, CheckCircle } from 'lucide-react';
 import './App.css';
 
 import Header from './components/Header';
@@ -9,35 +10,35 @@ import SuccessPage from './components/SuccessPage';
 import LegalPage from './components/LegalPage';
 import Footer from './components/Footer';
 import { createCheckoutSession } from './services/checkoutService';
-
 import { getProducts } from './services/productService';
 
 function App() {
   const [products, setProducts] = useState([]);
 
+  const isReturningFromPayment = () => {
+    const params = new URLSearchParams(window.location.search);
+    return window.location.pathname === '/success' && params.get('session_id');
+  };
+
   const [cart, setCart] = useState(() => {
+    if (isReturningFromPayment()) {
+      localStorage.removeItem('burovia_cart');
+      return [];
+    }
     const savedCart = localStorage.getItem('burovia_cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(isReturningFromPayment);
   const [legalPage, setLegalPage] = useState(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    const isSuccessPage = window.location.pathname === '/success';
-
-    if (isSuccessPage && sessionId) {
-      localStorage.removeItem('burovia_cart');
-      setCart([]);
-      setPaymentSuccess(true);
-
+    if (paymentSuccess) {
       window.history.replaceState({}, document.title, '/');
     }
-  }, []);
+  }, [paymentSuccess]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,7 +47,7 @@ function App() {
         setProducts(productsFromApi);
       } catch (error) {
         console.error('Erreur récupération produits :', error);
-        setErrorMessage('Impossible de récupérer les produits depuis le backend.');
+        setErrorMessage('Impossible de récupérer les produits. Veuillez réessayer plus tard.');
       } finally {
         setLoading(false);
       }
@@ -176,39 +177,82 @@ function App() {
       <Header cartCount={cartCount} />
 
       <main>
+        {paymentSuccess && (
+          <div className="success-banner">
+            <CheckCircle size={22} />
+            Paiement confirmé — Merci pour votre commande Burovia !
+          </div>
+        )}
+
         <section className="hero-section">
-          <p className="hero-label">Accessoires de télétravail</p>
+          <p className="hero-label">
+            <Sparkles size={16} />
+            Accessoires de télétravail
+          </p>
 
-          <h1>Le confort du bureau, directement chez vous.</h1>
+          <h1>
+            Le confort du bureau,{' '}
+            <span>directement chez vous.</span>
+          </h1>
 
-          <p>
+          <p className="hero-description">
             Burovia sélectionne des accessoires simples, pratiques et utiles
             pour améliorer votre confort, votre posture et votre organisation
             en télétravail.
           </p>
 
-          <a href="#catalogue" className="cta-button">
-            Découvrir les essentiels
-          </a>
+          <div className="hero-actions">
+            <a href="#catalogue" className="cta-button">
+              Découvrir les essentiels
+              <ArrowRight size={18} />
+            </a>
+            <a href="#panier" className="cta-button-outline">
+              Voir le panier ({cartCount})
+            </a>
+          </div>
+
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <strong>FR · BE · LU</strong>
+              <span>Livraison suivie</span>
+            </div>
+            <div className="hero-stat">
+              <strong>Stripe</strong>
+              <span>Paiement sécurisé</span>
+            </div>
+            <div className="hero-stat">
+              <strong>5–10 jours</strong>
+              <span>Délai de livraison</span>
+            </div>
+          </div>
         </section>
 
         <section id="foot-2026" className="promo-section">
-          <span className="promo-badge">Collection saisonnière</span>
+          <span className="promo-badge">
+            Collection saisonnière
+          </span>
 
-          <h2>L’ambiance foot s’invite à votre bureau</h2>
+          <h2>L&apos;ambiance foot s&apos;invite à votre bureau</h2>
 
           <p>
             Préparez votre espace de travail pour les grands matchs avec une
-            sélection d’accessoires déco, tapis de bureau, mugs et petits objets
-            inspirés de l’univers football.
+            sélection d&apos;accessoires déco, tapis de bureau, mugs et petits objets
+            inspirés de l&apos;univers football.
           </p>
         </section>
 
         <section id="catalogue" className="products-section">
-          <h2>Nos essentiels télétravail</h2>
+          <div className="section-header">
+            <div>
+              <h2>Nos essentiels télétravail</h2>
+              <p className="section-subtitle">
+                Des accessoires sélectionnés pour votre bien-être au quotidien.
+              </p>
+            </div>
+          </div>
 
           {loading && (
-            <p className="status-message">Chargement des produits...</p>
+            <div className="loading-spinner" />
           )}
 
           {errorMessage && (
@@ -245,6 +289,19 @@ function App() {
         />
 
         <TrustSection />
+
+        <section className="newsletter-section">
+          <h2>Restez informé des nouveautés</h2>
+          <p>Recevez nos offres exclusives et les derniers produits en avant-première.</p>
+          <div className="newsletter-form">
+            <input
+              type="email"
+              placeholder="Votre adresse email"
+              aria-label="Adresse email"
+            />
+            <button type="button">S&apos;inscrire</button>
+          </div>
+        </section>
       </main>
 
       <Footer onLegalPage={openLegalPage} />
