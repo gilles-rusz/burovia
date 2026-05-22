@@ -5,6 +5,9 @@ import Header from './components/Header';
 import ProductCard from './components/ProductCard';
 import Cart from './components/Cart';
 import TrustSection from './components/TrustSection';
+import SuccessPage from './components/SuccessPage';
+import LegalPage from './components/LegalPage';
+import Footer from './components/Footer';
 import { createCheckoutSession } from './services/checkoutService';
 
 import { getProducts } from './services/productService';
@@ -20,6 +23,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [legalPage, setLegalPage] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -138,16 +142,40 @@ function App() {
     0
   );
 
+  const openLegalPage = (page) => {
+    setLegalPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (paymentSuccess) {
+    return (
+      <>
+        <Header cartCount={0} />
+        <main>
+          <SuccessPage onBackToShop={() => setPaymentSuccess(false)} />
+        </main>
+        <Footer onLegalPage={openLegalPage} />
+      </>
+    );
+  }
+
+  if (legalPage) {
+    return (
+      <>
+        <Header cartCount={cartCount} />
+        <main>
+          <LegalPage page={legalPage} onBack={() => setLegalPage(null)} />
+        </main>
+        <Footer onLegalPage={openLegalPage} />
+      </>
+    );
+  }
+
   return (
     <>
       <Header cartCount={cartCount} />
 
       <main>
-        {paymentSuccess && (
-          <div className="success-message">
-            Paiement confirmé. Merci pour votre commande Burovia.
-          </div>
-        )}
         <section className="hero-section">
           <p className="hero-label">Accessoires de télétravail</p>
 
@@ -218,6 +246,8 @@ function App() {
 
         <TrustSection />
       </main>
+
+      <Footer onLegalPage={openLegalPage} />
     </>
   );
 }
