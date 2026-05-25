@@ -6,7 +6,10 @@ const pool = require('./config/db');
 
 const productRoutes = require('./routes/productRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
 const stripeController = require('./controllers/stripeController');
+const initDb = require('./config/initDb');
 
 const app = express();
 
@@ -50,9 +53,16 @@ app.get('/api/test-db', async (req, res) => {
 
 app.use('/api/products', productRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Serveur Burovia lancé sur le port ${PORT}`);
+  try {
+    await initDb();
+  } catch (error) {
+    console.error('Erreur initialisation base de données :', error);
+  }
 });

@@ -110,6 +110,16 @@ CREATE TABLE order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    email         VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role          ENUM('customer', 'admin') DEFAULT 'customer',
+    first_name    VARCHAR(100),
+    last_name     VARCHAR(100),
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO categories (name, slug, description) VALUES
 ('Confort & posture', 'confort-posture', 'Accessoires pour améliorer la posture en télétravail'),
 ('Organisation du bureau', 'organisation-bureau', 'Accessoires pour garder un bureau propre et rangé'),
