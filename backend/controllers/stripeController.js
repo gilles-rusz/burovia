@@ -4,8 +4,11 @@ const {
   getProductsByIds,
   createPendingOrderWithItems,
   getOrderById,
+  getOrderItems,
   markOrderAsPaid
 } = require('../services/orderService');
+
+const { sendOrderConfirmation } = require('../services/emailService');
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -166,7 +169,7 @@ exports.handleStripeWebhook = async (req, res) => {
       const shipping = session.shipping_details;
       const customer = session.customer_details;
 
-      await markOrderAsPaid(orderId, {
+      const paidData = {
         stripe_session_id: session.id,
         stripe_payment_intent_id: session.payment_intent,
         customer_email: customer?.email || null,
@@ -177,9 +180,28 @@ exports.handleStripeWebhook = async (req, res) => {
         shipping_city: shipping?.address?.city || null,
         shipping_postal_code: shipping?.address?.postal_code || null,
         shipping_country_code: shipping?.address?.country || null
-      });
+      };
+
+      await markOrderAsPaid(orderId, paidData);
 
       console.log(`Commande ${orderId} passée en statut paid.`);
+
+      try {
+        const items = await getOrderItems(orderId);
+        await sendOrderConfirmation({
+          id: orderId,
+          customer_email: paidData.customer_email,
+          customer_name: paidData.customer_name,
+          total_amount_cents: order.total_amount_cents,
+          items,
+          shipping_address_line1: paidData.shipping_address_line1,
+          shipping_city: paidData.shipping_city,
+          shipping_postal_code: paidData.shipping_postal_code,
+          shipping_country_code: paidData.shipping_country_code,
+        });
+      } catch (emailError) {
+        console.error('Erreur envoi email confirmation (non bloquant) :', emailError.message);
+      }
     }
 
     return res.json({ received: true });
