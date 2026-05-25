@@ -10,3 +10,16 @@ export const getProducts = async () => {
 
   return data.products;
 };
+
+export const getProductsByCategory = async (categorySlug) => {
+  const response = await fetch(
+    `${API_URL}/api/products?category=${encodeURIComponent(categorySlug)}`
+  );
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || 'Erreur lors de la récupération des produits.');
+  }
+
+  return data.products;
+};

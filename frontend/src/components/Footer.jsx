@@ -14,8 +14,8 @@ function Footer({ onLegalPage }) {
           <h3>Boutique</h3>
           <ul>
             <li><a href="#catalogue">Catalogue</a></li>
-            <li><a href="#catalogue">Confort &amp; Posture</a></li>
-            <li><a href="#catalogue">Organisation</a></li>
+            <li><a href="#confort">Confort &amp; Posture</a></li>
+            <li><a href="#organisation">Organisation</a></li>
             <li><a href="#foot-2026">Foot 2026</a></li>
           </ul>
         </div>
@@ -69,7 +69,7 @@ function Footer({ onLegalPage }) {
       </div>
 
       <div className="footer-bottom">
-        © 2026 Burovia · Un projet Web RG Est
+        © 2026 Burovia by Web RG Est
       </div>
     </footer>
   );

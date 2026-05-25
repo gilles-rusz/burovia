@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python3 *)",
-      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\('C:\\\\Users\\\\Bnvcx\\\\Documents\\\\burovia-ecommerce\\\\frontend\\\\src\\\\App.jsx'\\); $lines = [System.Text.Encoding]::UTF8.GetString\\($bytes\\) -split \"`n\"; $line147 = $lines[146]; [System.Text.Encoding]::UTF8.GetBytes\\($line147\\) | ForEach-Object { '{0:X2}' -f $_ } | Join-String -Separator ' ')"
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\('C:\\\\Users\\\\Bnvcx\\\\Documents\\\\burovia-ecommerce\\\\frontend\\\\src\\\\App.jsx'\\); $lines = [System.Text.Encoding]::UTF8.GetString\\($bytes\\) -split \"`n\"; $line147 = $lines[146]; [System.Text.Encoding]::UTF8.GetBytes\\($line147\\) | ForEach-Object { '{0:X2}' -f $_ } | Join-String -Separator ' ')",
+      "Bash(npm install *)",
+      "Bash(node -e \"require\\('nodemailer'\\); console.log\\('nodemailer OK'\\)\")"
     ]
   }
 }
