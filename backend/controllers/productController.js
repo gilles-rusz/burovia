@@ -2,8 +2,10 @@ const pool = require('../config/db');
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const [products] = await pool.execute(`
-      SELECT 
+    const { category } = req.query;
+
+    const query = `
+      SELECT
         p.id,
         p.sku,
         p.name,
@@ -23,12 +25,15 @@ exports.getAllProducts = async (req, res) => {
         pi.alt_text AS image_alt
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_images pi 
-        ON pi.product_id = p.id 
+      LEFT JOIN product_images pi
+        ON pi.product_id = p.id
         AND pi.is_main = TRUE
       WHERE p.is_active = TRUE
+      ${category ? 'AND c.slug = ?' : ''}
       ORDER BY p.created_at DESC
-    `);
+    `;
+
+    const [products] = await pool.execute(query, category ? [category] : []);
 
     res.json({
       success: true,

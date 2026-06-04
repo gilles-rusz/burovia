@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const pool = require('./config/db');
@@ -19,11 +21,31 @@ app.post(
   stripeController.handleStripeWebhook
 );
 
+app.use(helmet());
+
 app.use(cors({
-  origin: process.env.CLIENT_URL
+  origin: 'http://localhost:5173'
 }));
 
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de requêtes, veuillez réessayer dans 15 minutes.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives de connexion, veuillez réessayer dans 15 minutes.' }
+});
+
 app.use(express.json());
+
+app.use(generalLimiter);
 
 app.get('/', (req, res) => {
   res.json({
@@ -54,7 +76,7 @@ app.get('/api/test-db', async (req, res) => {
 app.use('/api/products', productRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 
 const PORT = process.env.PORT || 5000;
 

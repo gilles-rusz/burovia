@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { body, validationResult } = require('express-validator');
 const pool = require('../config/db');
 
 const signToken = (user) =>
@@ -9,15 +10,34 @@ const signToken = (user) =>
     { expiresIn: '7d' }
   );
 
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+  next();
+};
+
+const registerValidators = [
+  body('email')
+    .isEmail().withMessage('Format email invalide')
+    .normalizeEmail(),
+  body('password')
+    .isLength({ min: 8 }).withMessage('Le mot de passe doit contenir au moins 8 caractères'),
+  handleValidationErrors
+];
+
+const loginValidators = [
+  body('email')
+    .isEmail().withMessage('Format email invalide')
+    .normalizeEmail(),
+  body('password')
+    .notEmpty().withMessage('Mot de passe requis'),
+  handleValidationErrors
+];
+
 const register = async (req, res) => {
   const { email, password, first_name, last_name } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email et mot de passe requis' });
-  }
-  if (password.length < 8) {
-    return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 8 caractères' });
-  }
 
   try {
     const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
@@ -42,10 +62,6 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email et mot de passe requis' });
-  }
 
   try {
     const [rows] = await pool.execute(
@@ -75,4 +91,4 @@ const getMe = (req, res) => {
   res.json({ user: req.user });
 };
 
-module.exports = { register, login, getMe };
+module.exports = { register, login, getMe, registerValidators, loginValidators };

@@ -5,10 +5,12 @@ const {
   createPendingOrderWithItems,
   getOrderById,
   getOrderItems,
-  markOrderAsPaid
+  markOrderAsPaid,
+  updateOrderStatus
 } = require('../services/orderService');
 
 const { sendOrderConfirmation } = require('../services/emailService');
+const cjService = require('../services/cjService');
 
 exports.createCheckoutSession = async (req, res) => {
   try {
@@ -39,10 +41,10 @@ exports.createCheckoutSession = async (req, res) => {
         });
       }
 
-      if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 20) {
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({
           success: false,
-          error: 'Quantité invalide.'
+          error: 'La quantité doit être comprise entre 1 et 10.'
         });
       }
 
@@ -186,8 +188,14 @@ exports.handleStripeWebhook = async (req, res) => {
 
       console.log(`Commande ${orderId} passée en statut paid.`);
 
+      let items = [];
       try {
-        const items = await getOrderItems(orderId);
+        items = await getOrderItems(orderId);
+      } catch (itemsError) {
+        console.error('Erreur récupération items commande :', itemsError.message);
+      }
+
+      try {
         await sendOrderConfirmation({
           id: orderId,
           customer_email: paidData.customer_email,
@@ -201,6 +209,35 @@ exports.handleStripeWebhook = async (req, res) => {
         });
       } catch (emailError) {
         console.error('Erreur envoi email confirmation (non bloquant) :', emailError.message);
+      }
+
+      try {
+        const cjItems = items.filter((i) => i.supplier_vid);
+
+        if (cjItems.length > 0) {
+          const cjOrderPayload = {
+            orderNumber: `BUROVIA-${orderId}`,
+            shippingCountry: paidData.shipping_country_code,
+            shippingZip: paidData.shipping_postal_code,
+            shippingPhone: paidData.customer_phone,
+            shippingCustomerName: paidData.customer_name,
+            shippingAddress: paidData.shipping_address_line1,
+            shippingAddress2: paidData.shipping_address_line2 || '',
+            shippingCity: paidData.shipping_city,
+            products: cjItems.map((i) => ({
+              vid: i.supplier_vid,
+              quantity: i.quantity
+            }))
+          };
+
+          const cjResult = await cjService.createOrder(cjOrderPayload);
+          console.log(`Commande CJ créée pour commande ${orderId} :`, JSON.stringify(cjResult));
+
+          await updateOrderStatus(orderId, 'supplier_pending');
+          console.log(`Commande ${orderId} passée en statut supplier_pending.`);
+        }
+      } catch (cjError) {
+        console.error(`Erreur création commande CJ (non bloquant) :`, cjError.message);
       }
     }
 

@@ -60,4 +60,78 @@ router.get('/orders', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+router.get('/orders/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({ error: 'ID commande invalide.' });
+    }
+
+    const [[order]] = await pool.execute(
+      'SELECT * FROM orders WHERE id = ? LIMIT 1',
+      [orderId]
+    );
+
+    if (!order) {
+      return res.status(404).json({ error: 'Commande introuvable.' });
+    }
+
+    const [items] = await pool.execute(
+      `SELECT product_id, supplier_id, supplier_vid, name, quantity, unit_price_cents, cost_price_cents
+       FROM order_items WHERE order_id = ?`,
+      [orderId]
+    );
+
+    return res.json({ order: { ...order, items } });
+  } catch (error) {
+    console.error('Erreur récupération commande :', error);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+const VALID_STATUSES = [
+  'pending_payment',
+  'paid',
+  'supplier_pending',
+  'supplier_confirmed',
+  'shipped',
+  'delivered',
+  'cancelled',
+  'refunded'
+];
+
+router.put('/orders/:id/status', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({ error: 'ID commande invalide.' });
+    }
+
+    if (!status || !VALID_STATUSES.includes(status)) {
+      return res.status(400).json({
+        error: `Statut invalide. Valeurs acceptées : ${VALID_STATUSES.join(', ')}`
+      });
+    }
+
+    const [[order]] = await pool.execute(
+      'SELECT id FROM orders WHERE id = ? LIMIT 1',
+      [orderId]
+    );
+
+    if (!order) {
+      return res.status(404).json({ error: 'Commande introuvable.' });
+    }
+
+    await pool.execute('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+
+    return res.json({ success: true, order_id: orderId, status });
+  } catch (error) {
+    console.error('Erreur mise à jour statut commande :', error);
+    return res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

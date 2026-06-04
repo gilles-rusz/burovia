@@ -116,6 +116,13 @@ exports.getOrderItems = async (orderId) => {
   return rows;
 };
 
+exports.updateOrderStatus = async (orderId, status) => {
+  await pool.execute(
+    'UPDATE orders SET status = ? WHERE id = ?',
+    [status, orderId]
+  );
+};
+
 exports.markOrderAsPaid = async (orderId, data) => {
   await pool.execute(
     `
