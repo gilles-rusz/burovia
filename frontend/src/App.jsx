@@ -264,14 +264,14 @@ function App() {
           </div>
         </section>
 
-        <section id="foot-2026" className="promo-section animate-on-scroll">
+        <section id="special-ete" className="promo-section animate-on-scroll">
           <div className="promo-section-inner">
-            <span className="promo-badge">ÉTÉ &amp; FOOT 2026</span>
+            <span className="promo-badge">SPÉCIAL ÉTÉ</span>
             <h2>L'été arrive — l'ambiance s'invite à votre bureau</h2>
             <p>
-              Soleil, matchs, grandes tablées... Burovia sélectionne des accessoires
-              pour profiter pleinement de la saison : protections solaires, accessoires
-              d'ambiance et indispensables du bureau estival.
+              Soleil, chaleur, grands espaces... Burovia sélectionne des accessoires
+              pour profiter pleinement de la saison : batteries solaires, ventilateurs
+              de bureau et indispensables du télétravail estival.
             </p>
           </div>
         </section>

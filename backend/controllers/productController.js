@@ -92,9 +92,21 @@ exports.getProductBySlug = async (req, res) => {
       });
     }
 
+    const product = rows[0];
+
+    const [images] = await pool.execute(
+      `SELECT url, alt_text, is_main, sort_order
+       FROM product_images
+       WHERE product_id = ?
+       ORDER BY is_main DESC, sort_order ASC`,
+      [product.id]
+    );
+
+    product.images = images;
+
     res.json({
       success: true,
-      product: rows[0]
+      product
     });
   } catch (error) {
     console.error('Erreur récupération produit :', error);
