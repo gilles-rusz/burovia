@@ -152,23 +152,30 @@ function App() {
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cart.reduce((total, item) => total + item.price_cents * item.quantity, 0);
 
-  const openLegalPage = (page) => {
-    setLegalPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const openCategory = (cat) => {
-    setCurrentCategory(cat);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const goHome = () => {
-    setCurrentCategory(null);
+  const resetViews = () => {
     setSelectedProduct(null);
     setShowAdmin(false);
     setShowLogin(false);
     setShowRegister(false);
     setLegalPage(null);
+    setCurrentCategory(null);
+    setPaymentSuccess(false);
+  };
+
+  const openLegalPage = (page) => {
+    resetViews();
+    setLegalPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openCategory = (cat) => {
+    resetViews();
+    setCurrentCategory(cat);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goHome = () => {
+    resetViews();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

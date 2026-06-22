@@ -24,7 +24,7 @@ app.post(
 app.use(helmet());
 
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173'
 }));
 
 const generalLimiter = rateLimit({
@@ -53,25 +53,17 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/api/test-db', async (req, res) => {
-  try {
-    const [products] = await pool.execute('SELECT * FROM products');
-
-    res.json({
-      success: true,
-      message: 'Connexion MySQL réussie',
-      products
-    });
-  } catch (error) {
-    console.error('Erreur MySQL :', error);
-
-    res.status(500).json({
-      success: false,
-      message: 'Erreur de connexion MySQL',
-      error: error.message
-    });
-  }
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/test-db', async (req, res) => {
+    try {
+      const [products] = await pool.execute('SELECT * FROM products');
+      res.json({ success: true, message: 'Connexion MySQL réussie', products });
+    } catch (error) {
+      console.error('Erreur MySQL :', error);
+      res.status(500).json({ success: false, message: 'Erreur de connexion MySQL' });
+    }
+  });
+}
 
 app.use('/api/products', productRoutes);
 app.use('/api/stripe', stripeRoutes);
