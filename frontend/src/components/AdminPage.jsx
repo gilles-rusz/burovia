@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const STATUS_LABELS = {
   pending_payment: 'En attente',
   paid: 'Payé',
@@ -28,7 +30,7 @@ function AdminPage({ onBack }) {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/admin/orders', {
+        const res = await fetch(`${API_URL}/api/admin/orders`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Accès refusé ou erreur serveur');
