@@ -44,15 +44,26 @@ function Header({ cartCount, onShowLogin, onShowAdmin, onShowCategory, onGoHome 
           Organisation
         </a>
         <a
-          href="#foot-2026"
+          href="#peripheriques"
           onClick={showCategory({
-            slug: 'foot-2026',
-            name: 'Été & Foot 2026',
+            slug: 'peripheriques-accessoires',
+            name: 'Périphériques & Accessoires',
+            description: 'Claviers, webcams, souris et accessoires pour votre setup',
+            heroImage: '/images/catalogue-bg.png'
+          })}
+        >
+          Périphériques
+        </a>
+        <a
+          href="#special-ete"
+          onClick={showCategory({
+            slug: 'special-ete',
+            name: 'Spécial Été',
             description: "L'été arrive — accessoires saisonniers pour votre bureau",
             heroImage: '/images/promo-bg.png'
           })}
         >
-          Été &amp; Foot 2026
+          Spécial Été
         </a>
       </nav>
 
