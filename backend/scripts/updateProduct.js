@@ -4,8 +4,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const pool = require('../config/db');
 
 async function update() {
-  const conn = await pool.getConnection();
-  await conn.query(`
+  const client = await pool.connect();
+  await client.query(`
     UPDATE products SET
       name = 'Lampe de bureau portable rechargeable',
       slug = 'lampe-bureau-portable',
@@ -15,12 +15,12 @@ async function update() {
       delivery_estimate = 'Livraison estimée 8-15 jours ouvrés'
     WHERE name = 'Repose-pieds ergonomique'
   `);
-  await conn.query(`
+  await client.query(`
     UPDATE product_images SET url = '/images/lampe-bureau.jpg'
     WHERE product_id = (SELECT id FROM products WHERE slug = 'lampe-bureau-portable')
   `);
   console.log('Produit mis à jour avec succès');
-  conn.release();
+  client.release();
   process.exit();
 }
 

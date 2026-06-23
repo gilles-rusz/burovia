@@ -4,12 +4,12 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const pool = require('../config/db');
 
 async function updateProduct() {
-  const conn = await pool.getConnection();
+  const client = await pool.connect();
 
   try {
-    await conn.beginTransaction();
+    await client.query('BEGIN');
 
-    const [res1] = await conn.execute(`
+    const res1 = await client.query(`
       UPDATE products SET
         name               = 'Lampe de bureau portable rechargeable',
         slug               = 'lampe-bureau-portable',
@@ -20,25 +20,25 @@ async function updateProduct() {
       WHERE slug = 'repose-pieds-ergonomique'
     `);
 
-    if (res1.affectedRows === 0) {
+    if (res1.rowCount === 0) {
       throw new Error('Produit "repose-pieds-ergonomique" introuvable — aucune ligne mise à jour.');
     }
 
-    await conn.execute(`
+    await client.query(`
       UPDATE product_images
       SET url = '/images/lampe-bureau.jpg'
       WHERE product_id = (SELECT id FROM products WHERE slug = 'lampe-bureau-portable')
     `);
 
-    await conn.commit();
+    await client.query('COMMIT');
 
     console.log('Produit mis à jour avec succès : lampe-bureau-portable');
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     console.error('Erreur :', err.message);
     process.exit(1);
   } finally {
-    conn.release();
+    client.release();
     process.exit(0);
   }
 }

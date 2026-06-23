@@ -4,6 +4,14 @@ exports.getAllProducts = async (req, res) => {
   try {
     const { category } = req.query;
 
+    const params = [];
+    let categoryFilter = '';
+
+    if (category) {
+      params.push(category);
+      categoryFilter = `AND c.slug = $${params.length}`;
+    }
+
     const query = `
       SELECT
         p.id,
@@ -29,15 +37,15 @@ exports.getAllProducts = async (req, res) => {
         ON pi.product_id = p.id
         AND pi.is_main = TRUE
       WHERE p.is_active = TRUE
-      ${category ? 'AND c.slug = ?' : ''}
+      ${categoryFilter}
       ORDER BY p.created_at DESC
     `;
 
-    const [products] = await pool.execute(query, category ? [category] : []);
+    const result = await pool.query(query, params);
 
     res.json({
       success: true,
-      products
+      products: result.rows
     });
   } catch (error) {
     console.error('Erreur récupération produits :', error);
@@ -53,7 +61,7 @@ exports.getProductBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const [rows] = await pool.execute(
+    const result = await pool.query(
       `
       SELECT 
         p.id,
@@ -78,31 +86,31 @@ exports.getProductBySlug = async (req, res) => {
       LEFT JOIN product_images pi 
         ON pi.product_id = p.id 
         AND pi.is_main = TRUE
-      WHERE p.slug = ?
+      WHERE p.slug = $1
       AND p.is_active = TRUE
       LIMIT 1
       `,
       [slug]
     );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: 'Produit introuvable.'
       });
     }
 
-    const product = rows[0];
+    const product = result.rows[0];
 
-    const [images] = await pool.execute(
+    const imagesResult = await pool.query(
       `SELECT url, alt_text, is_main, sort_order
        FROM product_images
-       WHERE product_id = ?
+       WHERE product_id = $1
        ORDER BY is_main DESC, sort_order ASC`,
       [product.id]
     );
 
-    product.images = images;
+    product.images = imagesResult.rows;
 
     res.json({
       success: true,

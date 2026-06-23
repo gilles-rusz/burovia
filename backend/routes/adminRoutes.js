@@ -5,7 +5,7 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 router.get('/orders', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const [rows] = await pool.execute(`
+    const result = await pool.query(`
       SELECT
         o.id,
         o.created_at,
@@ -27,7 +27,7 @@ router.get('/orders', requireAuth, requireAdmin, async (req, res) => {
 
     const ordersMap = new Map();
 
-    for (const row of rows) {
+    for (const row of result.rows) {
       if (!ordersMap.has(row.id)) {
         ordersMap.set(row.id, {
           id: row.id,
@@ -68,22 +68,24 @@ router.get('/orders/:id', requireAuth, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'ID commande invalide.' });
     }
 
-    const [[order]] = await pool.execute(
-      'SELECT * FROM orders WHERE id = ? LIMIT 1',
+    const orderResult = await pool.query(
+      'SELECT * FROM orders WHERE id = $1 LIMIT 1',
       [orderId]
     );
+
+    const order = orderResult.rows[0];
 
     if (!order) {
       return res.status(404).json({ error: 'Commande introuvable.' });
     }
 
-    const [items] = await pool.execute(
+    const itemsResult = await pool.query(
       `SELECT product_id, supplier_id, supplier_vid, name, quantity, unit_price_cents, cost_price_cents
-       FROM order_items WHERE order_id = ?`,
+       FROM order_items WHERE order_id = $1`,
       [orderId]
     );
 
-    return res.json({ order: { ...order, items } });
+    return res.json({ order: { ...order, items: itemsResult.rows } });
   } catch (error) {
     console.error('Erreur récupération commande :', error);
     return res.status(500).json({ error: 'Erreur serveur' });
@@ -116,16 +118,16 @@ router.put('/orders/:id/status', requireAuth, requireAdmin, async (req, res) => 
       });
     }
 
-    const [[order]] = await pool.execute(
-      'SELECT id FROM orders WHERE id = ? LIMIT 1',
+    const orderResult = await pool.query(
+      'SELECT id FROM orders WHERE id = $1 LIMIT 1',
       [orderId]
     );
 
-    if (!order) {
+    if (!orderResult.rows[0]) {
       return res.status(404).json({ error: 'Commande introuvable.' });
     }
 
-    await pool.execute('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+    await pool.query('UPDATE orders SET status = $1 WHERE id = $2', [status, orderId]);
 
     return res.json({ success: true, order_id: orderId, status });
   } catch (error) {

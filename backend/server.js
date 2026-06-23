@@ -56,11 +56,11 @@ app.get('/', (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   app.get('/api/test-db', async (req, res) => {
     try {
-      const [products] = await pool.execute('SELECT * FROM products');
-      res.json({ success: true, message: 'Connexion MySQL réussie', products });
+      const result = await pool.query('SELECT * FROM products');
+      res.json({ success: true, message: 'Connexion PostgreSQL réussie', products: result.rows });
     } catch (error) {
-      console.error('Erreur MySQL :', error);
-      res.status(500).json({ success: false, message: 'Erreur de connexion MySQL' });
+      console.error('Erreur PostgreSQL :', error);
+      res.status(500).json({ success: false, message: 'Erreur de connexion PostgreSQL' });
     }
   });
 }
