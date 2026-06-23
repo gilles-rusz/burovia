@@ -16,45 +16,45 @@ const galleryImages = [
 ];
 
 async function seedGallery() {
-  const conn = await pool.getConnection();
+  const client = await pool.connect();
 
   try {
-    await conn.beginTransaction();
+    await client.query('BEGIN');
 
     let inserted = 0;
 
     for (const entry of galleryImages) {
-      const [rows] = await conn.execute(
-        'SELECT id, name FROM products WHERE slug = ?',
+      const result = await client.query(
+        'SELECT id, name FROM products WHERE slug = $1',
         [entry.slug]
       );
 
-      if (rows.length === 0) {
+      if (result.rows.length === 0) {
         console.warn(`Produit introuvable : ${entry.slug} — ignoré`);
         continue;
       }
 
-      const productId = rows[0].id;
-      const productName = rows[0].name;
+      const productId = result.rows[0].id;
+      const productName = result.rows[0].name;
 
       for (let i = 0; i < entry.images.length; i++) {
-        await conn.execute(
+        await client.query(
           `INSERT INTO product_images (product_id, url, alt_text, is_main, sort_order)
-           VALUES (?, ?, ?, FALSE, ?)`,
+           VALUES ($1, $2, $3, FALSE, $4)`,
           [productId, entry.images[i], `${productName} — vue ${i + 2}`, i + 1]
         );
         inserted++;
       }
     }
 
-    await conn.commit();
+    await client.query('COMMIT');
     console.log(`${inserted} images galerie ajoutées avec succès`);
   } catch (err) {
-    await conn.rollback();
+    await client.query('ROLLBACK');
     console.error('Erreur lors du seed galerie :', err.message);
     process.exit(1);
   } finally {
-    conn.release();
+    client.release();
     process.exit(0);
   }
 }

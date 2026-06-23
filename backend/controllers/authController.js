@@ -40,19 +40,19 @@ const register = async (req, res) => {
   const { email, password, first_name, last_name } = req.body;
 
   try {
-    const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) {
+    const existingResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingResult.rows.length > 0) {
       return res.status(409).json({ error: 'Cet email est déjà utilisé' });
     }
 
     const password_hash = await bcrypt.hash(password, 12);
 
-    const [result] = await pool.execute(
-      'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
+    const insertResult = await pool.query(
+      'INSERT INTO users (email, password_hash, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id',
       [email, password_hash, first_name || null, last_name || null]
     );
 
-    const user = { id: result.insertId, email, role: 'customer', first_name: first_name || null };
+    const user = { id: insertResult.rows[0].id, email, role: 'customer', first_name: first_name || null };
     res.status(201).json({ token: signToken(user), user });
   } catch (error) {
     console.error('Erreur register :', error);
@@ -64,16 +64,16 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await pool.execute(
-      'SELECT id, email, password_hash, role, first_name FROM users WHERE email = ?',
+    const result = await pool.query(
+      'SELECT id, email, password_hash, role, first_name FROM users WHERE email = $1',
       [email]
     );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
 
-    const user = rows[0];
+    const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
