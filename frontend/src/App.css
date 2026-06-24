@@ -1780,3 +1780,7 @@ a { color: inherit; text-decoration: none; }
   .burger-btn { display: flex; }
   .header-actions { display: none; }
 }
+.hero-section {
+  min-height: 50vh;
+  background-attachment: scroll;
+}
