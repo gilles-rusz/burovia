@@ -1787,4 +1787,8 @@ a { color: inherit; text-decoration: none; }
     opacity: 1 !important;
     transform: none !important;
   }
+  .mobile-menu-actions .cart-button {
+    text-align: center;
+    width: 100%;
+  }
 }
