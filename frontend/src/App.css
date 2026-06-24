@@ -1725,3 +1725,58 @@ a { color: inherit; text-decoration: none; }
   .cart-total { flex-direction: column; align-items: flex-start; }
   .cart-total-actions { flex-wrap: wrap; }
 }
+/* ── Burger menu mobile ── */
+.burger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 200;
+}
+
+.burger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  background: white;
+  z-index: 99;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(30,58,95,0.12);
+  border-top: 2px solid var(--accent);
+}
+
+.mobile-menu a {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bg-light);
+}
+
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .burger-btn { display: flex; }
+  .header-actions { display: none; }
+}
