@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(node *)",
+      "PowerShell(Get-Service *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(& \"C:\\\\xampp\\\\mysql\\\\bin\\\\mysqladmin.exe\" -u root status 2>&1)"
+    ]
+  }
+}

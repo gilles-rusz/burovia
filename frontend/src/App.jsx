@@ -273,7 +273,13 @@ function App() {
 
         <section id="special-ete" className="promo-section animate-on-scroll">
           <div className="promo-section-inner">
-            <span className="promo-badge">SPÉCIAL ÉTÉ</span>
+            <span
+              className="promo-badge"
+              onClick={() => openCategory({ slug: 'special-ete', name: 'Spécial Été' })}
+              style={{ cursor: 'pointer' }}
+            >
+              SPÉCIAL ÉTÉ
+            </span>
             <h2>L'été arrive — l'ambiance s'invite à votre bureau</h2>
             <p>
               Soleil, chaleur, grands espaces... Burovia sélectionne des accessoires
