@@ -1,4 +1,10 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Stripe = require('stripe');
+
+let stripeClient;
+const getStripe = () => {
+  if (!stripeClient) stripeClient = Stripe(process.env.STRIPE_SECRET_KEY);
+  return stripeClient;
+};
 
 const {
   getProductsByIds,
@@ -86,7 +92,7 @@ exports.createCheckoutSession = async (req, res) => {
       items: orderItems
     });
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: lineItems,
@@ -130,7 +136,7 @@ exports.handleStripeWebhook = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       req.body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
