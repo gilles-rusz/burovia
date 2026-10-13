@@ -10,6 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 const stripeController = require('./controllers/stripeController');
 
 const app = express();
@@ -70,5 +71,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/contact', contactRoutes);
 
 module.exports = app;
